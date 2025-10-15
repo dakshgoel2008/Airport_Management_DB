@@ -1,0 +1,6 @@
+/extra.md
+/reference
+/dummy.py
+.env
+**/__pycache__/
+todo.md
