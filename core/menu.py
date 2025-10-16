@@ -48,6 +48,7 @@ def search_menu():
     print("1. Search Flight by ID")
     print("2. Search Passenger by Name")
     print("3. Search for an Employee's Details")
+    print("4. Search for cheapest flights for your route")
     print("100. Back to Main Menu")
     return input("Enter your choice: ").strip()
 

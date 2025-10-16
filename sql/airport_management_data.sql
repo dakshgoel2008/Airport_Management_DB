@@ -1,3 +1,5 @@
+-- Sample dataset -> Will be updated according to the user
+
 -- AIRPORT
 INSERT INTO `AIRPORT` (`airport_code`, `name`, `city`, `country`, `timezone`, `type`, `elevation_ft`, `runway_count`) VALUES
 ('JFK', 'John F. Kennedy International Airport', 'New York', 'United States', 'America/New_York', 'International', 13, 4),

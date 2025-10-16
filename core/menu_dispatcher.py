@@ -102,6 +102,8 @@ def search_dispatch(choice, cursor) -> None:
         print("Function to search passenger by name not implemented yet.")
     elif choice == "3":
         search_employee(cursor) 
+    elif choice == "4":
+        find_cheapest_flights_on_route(cursor)      # will give the top 5 flights.
     else:
         print("Invalid option in Search menu.")
 

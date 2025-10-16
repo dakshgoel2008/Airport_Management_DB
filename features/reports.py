@@ -16,8 +16,45 @@ def get_flight_duration(cursor):
     else:
         print("No flight found with the given details.")
 
+def occupancy_vs_price_report(cursor):
+    """Shows flight occupancy and average price per class."""
+    flight_number = input("Enter Flight Number: ")
+    flight_date = input("Enter Flight Date (YYYY-MM-DD): ")
+    query = """
+        select class, count(*) as passengers, avg(fare_amount) as avg_price
+        from ticket
+        where flight_number = %s and flight_date = %s and ticket_status = 'Active'
+        group by class;
+    """
+    cursor.execute(query, (flight_number), (flight_date))
+    res = cursor.fetchall()
+    if res:
+        print("\n" + "#"*100)
+        print(f"OCCUPANCY & PRICE REPORT FOR FLIGHT {flight_number}")
+        print("#"*100)
+        for row in res:
+            print(f"Class: {row['class']}, Passengers: {row['passengers']}, Avg Fare: ${row['avg_price']:.2f}")
+        print("#"*100)
+    else:
+        print("No active tickets found for this flight.")
 
 
+def avg_ticket_price_on_route(cursor):
+    """Calculates the average ticket price for a given route."""
+    src = input("Enter the source airport code (e.g., JFK): ")
+    des = input("Enter the destination airport code (e.g., JFK): ")
+    query = """
+        select avg(T.fare_amount) as avg_price
+        from ticket T
+        join flight F on T.flight_number = F.flight_number and T.flight_date = F.flight_date
+        where F.source_airport = %s and F.destination_airport = %s
+    """
+    cursor.execute(query, (src, des))
+    res = cursor.fetchone()
+    if res and res['average_price']:
+        print(f"\nAverage ticket price from {source} to {destination}: ${res['average_price']:.2f}")
+    else:
+        print("Could not calculate average price for this route.")
 
 
 

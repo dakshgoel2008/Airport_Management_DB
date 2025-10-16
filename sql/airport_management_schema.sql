@@ -1,11 +1,10 @@
 
--- Airport Management DB: Schema + Corrected Sample Data
 DROP DATABASE IF EXISTS `AIRPORT_MANAGEMENT_DB`;
 CREATE DATABASE `AIRPORT_MANAGEMENT_DB`;
 USE `AIRPORT_MANAGEMENT_DB`;
 
 -- ==============================================================
--- Schema (final corrected)
+-- My Schema 
 -- ==============================================================
 CREATE TABLE `AIRPORT`(
     `airport_code` CHAR(3) NOT NULL,
