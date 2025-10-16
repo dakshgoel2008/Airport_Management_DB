@@ -11,7 +11,7 @@ menu_map = {
     "6": reports_menu
 }
 
-def main_controller(cursor):
+def main_controller(cursor) -> None:
     """Controls main program flow"""
     while True:
         os.system("cls" if os.name == "nt" else "clear")
@@ -29,7 +29,7 @@ def main_controller(cursor):
             input("\nPress Enter to continue...\n")
 
 
-def handle_submenu(flag, submenu_func, cursor):
+def handle_submenu(flag, submenu_func, cursor) -> None:
     """Handles submenu logic dynamically"""
     while True:
         os.system("cls" if os.name == "nt" else "clear")
@@ -57,7 +57,7 @@ def handle_submenu(flag, submenu_func, cursor):
         input("\nPress Enter to continue...\n")
 
 # view dispatch:
-def view_dispatch(choice, cursor):
+def view_dispatch(choice, cursor) -> None:
     if choice == "1":
         show_all_airports(cursor)
     elif choice == "2":
@@ -66,3 +66,5 @@ def view_dispatch(choice, cursor):
         view_passenger_list(cursor)
     else:
         print("Invalid option in View menu.")
+
+# insert dispatch:
