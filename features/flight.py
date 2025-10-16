@@ -1,22 +1,20 @@
-def show_all_upcoming_flights(cursor):
-    cursor.execute("SELECT * FROM FLIGHT WHERE flight_date >= CURDATE()")
-    res = cursor.fetchall()
+def update_flight_status(cursor):
+    """Updates the status of a flight"""
+    flight_number = input("Enter Flight Number: ")
+    flight_date = input("Enter Flight Date (YYYY-MM-DD): ")
+    new_status = input("Enter new status (e.g., Delayed, Cancelled, Boarding): ")
+    delay_minutes = 0
+    if new_status.lower() == 'delayed':
+        delay_minutes = int(input("Enter delay in minutes: "))
 
-    if not res:
-        print("Sorry but no upcoming flights found.")
-        return
-    
-    print("\n" + "#"*100)
-    print("UPCOMING FLIGHTS")
-    print("#"*100)
-
-    for row in res:
-        print(f"Flight Number: {row['flight_number']}")
-        print(f"Airline ID: {row['airline_id']}")
-        print(f"From: {row['source_airport']} → To: {row['destination_airport']}")
-        print(f"Scheduled Departure: {row['scheduled_departure']}")
-        print(f"Scheduled Arrival: {row['scheduled_arrival']}")
-        print(f"Status: {row['status']}")
-        print(f"Gate: {row['gate_id']} | Terminal: {row['terminal']}")
-        print("#"*100)
-
+    try:
+        query = "UPDATE FLIGHT SET status = %s, delay_minutes = %s WHERE flight_number = %s AND flight_date = %s"
+        cursor.execute(query, (new_status, delay_minutes, flight_number, flight_date))
+        if cursor.rowcount > 0:
+            cursor.connection.commit()
+            print("Flight status updated successfully!")
+        else:
+            print("Flight not found for the given date.")
+    except Exception as e:
+        cursor.connection.rollback()
+        print(f"Error updating flight status: {e}")s

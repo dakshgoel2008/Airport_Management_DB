@@ -56,15 +56,65 @@ def handle_submenu(flag, submenu_func, cursor) -> None:
 
         input("\nPress Enter to continue...\n")
 
-# view dispatch:
+# dispatch subwindows:
 def view_dispatch(choice, cursor) -> None:
     if choice == "1":
-        show_all_airports(cursor)
-    elif choice == "2":
         show_all_upcoming_flights(cursor)
-    elif choice == "3":
+    elif choice == "2":
         view_passenger_list(cursor)
+    elif choice == "3":
+        view_flight_crew(cursor)
     else:
         print("Invalid option in View menu.")
 
-# insert dispatch:
+def insert_dispatch(choice, cursor) -> None:
+    if choice == "1":
+        add_new_ticket(cursor)
+    elif choice == "2":
+        add_new_flight(cursor)
+    elif choice == "3":
+        add_new_employee(cursor)
+    else:
+        print("Invalid option in Insert menu.")
+
+def update_dispatch(choice, cursor) -> None:
+    if choice == "1":
+        update_flight_status(cursor)
+    elif choice == "2":
+        update_salaries_by_position(cursor)
+    else:
+        print("Invalid option in Update menu.")
+
+def delete_dispatch(choice, cursor) -> None:
+    if choice == "1":
+        fire_employee(cursor)
+    elif choice == "2":
+        cancel_ticket(cursor)
+    elif choice == "3":
+        cancel_flight(cursor)
+    else:
+        print("Invalid option in Delete menu.")
+
+def search_dispatch(choice, cursor) -> None:
+    if choice == "1":
+        print("Function to search flight by ID not implemented yet.")
+    elif choice == "2":
+        print("Function to search passenger by name not implemented yet.")
+    elif choice == "3":
+        search_employee(cursor) 
+    else:
+        print("Invalid option in Search menu.")
+
+def reports_dispatch(choice, cursor) -> None:
+    if choice == "1":
+        get_flight_duration(cursor)
+    elif choice == "2":
+        occupancy_vs_price_report(cursor)
+    elif choice == "3":
+        avg_ticket_price_on_route(cursor)
+    elif choice == "4":
+        show_flight_revenue_report(cursor)
+    elif choice == "5":
+        view_flight_status_log(cursor)
+    else:
+        print("Invalid option in Reports menu.")

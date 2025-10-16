@@ -294,3 +294,102 @@ CREATE TABLE `FLIGHT_STATUS_LOG`(
     FOREIGN KEY (`flight_number`, `flight_date`) REFERENCES `FLIGHT`(`flight_number`, `flight_date`) ON DELETE CASCADE,
     INDEX (`flight_number`, `flight_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==============================================================
+-- Original Schema ends here
+-- ==============================================================
+
+
+-- ==============================================================
+-- Assessment - 4 questions
+-- Stored Functions, Procedures, and Triggers
+-- ==============================================================
+
+-- Function to get the profit status of a flight
+DELIMITER $$
+CREATE FUNCTION GetFlightProfitStatus(
+    total_revenue DECIMAL(10, 2)
+)
+RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN
+    DECLARE profit_status VARCHAR(20);
+    IF total_revenue > 5000 THEN
+        SET profit_status = 'Profitable';
+    ELSE
+        SET profit_status = 'Under Target';
+    END IF;
+    RETURN profit_status;
+END$$
+DELIMITER ;
+
+-- Stored Procedure to generate a revenue report for a flight
+DELIMITER $$
+CREATE PROCEDURE GenerateFlightRevenueReport(
+    IN p_flight_number VARCHAR(10),
+    IN p_flight_date DATE
+)
+BEGIN
+    DECLARE v_fare_amount DECIMAL(10, 2);
+    DECLARE v_total_revenue DECIMAL(10, 2) DEFAULT 0.00;
+    DECLARE v_ticket_count INT DEFAULT 0;
+    DECLARE done INT DEFAULT FALSE;
+
+    DECLARE ticket_cursor CURSOR FOR
+        SELECT fare_amount
+        FROM TICKET
+        WHERE flight_number = p_flight_number AND flight_date = p_flight_date;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN ticket_cursor;
+
+    read_loop: LOOP
+        FETCH ticket_cursor INTO v_fare_amount;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        SET v_total_revenue = v_total_revenue + v_fare_amount;
+        SET v_ticket_count = v_ticket_count + 1;
+    END LOOP;
+
+    CLOSE ticket_cursor;
+
+    SELECT
+        p_flight_number AS 'Flight Number',
+        p_flight_date AS 'Flight Date',
+        v_ticket_count AS 'Number of Tickets Sold',
+        v_total_revenue AS 'Total Revenue',
+        GetFlightProfitStatus(v_total_revenue) AS 'Profit Status';
+
+END$$
+DELIMITER ;
+
+-- Trigger to log flight status changes
+DELIMITER $$
+CREATE TRIGGER AfterFlightStatusUpdate
+AFTER UPDATE ON FLIGHT
+FOR EACH ROW
+BEGIN
+    IF OLD.status <> NEW.status THEN
+        INSERT INTO FLIGHT_STATUS_LOG (
+            flight_number,
+            flight_date,
+            old_status,
+            new_status,
+            reason,
+            changed_by,
+            changed_at
+        )
+        VALUES (
+            NEW.flight_number,
+            NEW.flight_date,
+            OLD.status,
+            NEW.status,
+            'Status updated via system.',
+            USER(),
+            NOW()
+        );
+    END IF;
+END$$
+DELIMITER ;
