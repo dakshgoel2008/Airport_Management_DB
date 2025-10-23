@@ -71,11 +71,119 @@ def find_cheapest_flights_on_route(cursor):
 
 def add_new_flight(cursor):
     """Inserts a new flight into the database."""
-    print("Dummy Function")
+    try:
+        print("\n--- ADD NEW FLIGHT ---")
+        
+        # Display available airlines
+        cursor.execute("SELECT airline_id, name FROM AIRLINE WHERE status = 'Active'")
+        airlines = cursor.fetchall()
+        print("\nAvailable Airlines:")
+        for al in airlines:
+            print(f"  {al['airline_id']}: {al['name']}")
+        
+        flight_number = input("\nEnter Flight Number: ").upper()
+        airline_id = input("Enter Airline ID: ").upper()
+        
+        # Display available airports
+        cursor.execute("SELECT airport_code, name, city FROM AIRPORT")
+        airports = cursor.fetchall()
+        print("\nAvailable Airports:")
+        for ap in airports:
+            print(f"  {ap['airport_code']}: {ap['name']}, {ap['city']}")
+        
+        source_airport = input("\nEnter Source Airport Code: ").upper()
+        destination_airport = input("Enter Destination Airport Code: ").upper()
+        
+        if source_airport == destination_airport:
+            print("Source and destination cannot be the same!")
+            return
+        
+        scheduled_departure = input("Enter Scheduled Departure (YYYY-MM-DD HH:MM:SS): ")
+        scheduled_arrival = input("Enter Scheduled Arrival (YYYY-MM-DD HH:MM:SS): ")
+        flight_date = input("Enter Flight Date (YYYY-MM-DD): ")
+        
+        # Display available aircraft for the airline
+        cursor.execute("""
+            SELECT aircraft_id, registration, aircraft_type_id 
+            FROM AIRCRAFT 
+            WHERE airline_id = %s AND status = 'Active'
+        """, (airline_id,))
+        aircraft_list = cursor.fetchall()
+        
+        if aircraft_list:
+            print("\nAvailable Aircraft:")
+            for ac in aircraft_list:
+                print(f"  {ac['aircraft_id']}: {ac['registration']} ({ac['aircraft_type_id']})")
+            aircraft_id = input("Enter Aircraft ID (or leave blank): ")
+            if not aircraft_id:
+                aircraft_id = None
+        else:
+            aircraft_id = None
+            print("No aircraft available for this airline.")
+        
+        query = """
+            INSERT INTO FLIGHT (
+                flight_number, airline_id, aircraft_id, source_airport, 
+                destination_airport, scheduled_departure, scheduled_arrival, 
+                status, flight_date
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'Scheduled', %s)
+        """
+        cursor.execute(query, (
+            flight_number, airline_id, aircraft_id, source_airport,
+            destination_airport, scheduled_departure, scheduled_arrival, flight_date
+        ))
+        cursor.connection.commit()
+        print(f"\n✓ Flight {flight_number} added successfully!")
+        
+    except Exception as e:
+        cursor.connection.rollback()
+        print(f"Error adding flight: {e}")
+
 
 def update_flight_status(cursor):
-    """Updates the status of a flight."""
-    print("Dummy Function")
+    """Updates the status of a flight"""
+    flight_number = input("Enter Flight Number: ").upper()
+    flight_date = input("Enter Flight Date (YYYY-MM-DD): ")
+    
+    # Show available statuses
+    print("\nAvailable Statuses:")
+    print("1. Scheduled")
+    print("2. Delayed")
+    print("3. Boarding")
+    print("4. Departed")
+    print("5. Arrived")
+    print("6. Cancelled")
+    
+    status_choice = input("Select status (1-6): ")
+    status_map = {
+        '1': 'Scheduled',
+        '2': 'Delayed',
+        '3': 'Boarding',
+        '4': 'Departed',
+        '5': 'Arrived',
+        '6': 'Cancelled'
+    }
+    
+    new_status = status_map.get(status_choice)
+    if not new_status:
+        print("Invalid status choice!")
+        return
+    
+    delay_minutes = 0
+    if new_status == 'Delayed':
+        delay_minutes = int(input("Enter delay in minutes: "))
+
+    try:
+        query = "UPDATE FLIGHT SET status = %s, delay_minutes = %s WHERE flight_number = %s AND flight_date = %s"
+        cursor.execute(query, (new_status, delay_minutes, flight_number, flight_date))
+        if cursor.rowcount > 0:
+            cursor.connection.commit()
+            print("Flight status updated successfully!")
+        else:
+            print("Flight not found for the given date.")
+    except Exception as e:
+        cursor.connection.rollback()
+        print(f"Error updating flight status: {e}")
 
 
 

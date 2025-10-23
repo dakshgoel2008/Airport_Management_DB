@@ -18,15 +18,15 @@ def get_flight_duration(cursor):
 
 def occupancy_vs_price_report(cursor):
     """Shows flight occupancy and average price per class."""
-    flight_number = input("Enter Flight Number: ")
+    flight_number = input("Enter Flight Number: ").upper()
     flight_date = input("Enter Flight Date (YYYY-MM-DD): ")
     query = """
-        select class, count(*) as passengers, avg(fare_amount) as avg_price
-        from ticket
-        where flight_number = %s and flight_date = %s and ticket_status = 'Active'
-        group by class;
+        SELECT class, COUNT(*) as passengers, AVG(fare_amount) as avg_price
+        FROM TICKET
+        WHERE flight_number = %s AND flight_date = %s AND ticket_status = 'Active'
+        GROUP BY class
     """
-    cursor.execute(query, (flight_number), (flight_date))
+    cursor.execute(query, (flight_number, flight_date))  # Fixed: proper tuple
     res = cursor.fetchall()
     if res:
         print("\n" + "#"*100)
@@ -41,22 +41,20 @@ def occupancy_vs_price_report(cursor):
 
 def avg_ticket_price_on_route(cursor):
     """Calculates the average ticket price for a given route."""
-    src = input("Enter the source airport code (e.g., JFK): ")
-    des = input("Enter the destination airport code (e.g., JFK): ")
+    src = input("Enter the source airport code (e.g., JFK): ").upper()
+    des = input("Enter the destination airport code (e.g., LAX): ").upper()
     query = """
-        select avg(T.fare_amount) as avg_price
-        from ticket T
-        join flight F on T.flight_number = F.flight_number and T.flight_date = F.flight_date
-        where F.source_airport = %s and F.destination_airport = %s
+        SELECT AVG(T.fare_amount) as avg_price
+        FROM TICKET T
+        JOIN FLIGHT F ON T.flight_number = F.flight_number AND T.flight_date = F.flight_date
+        WHERE F.source_airport = %s AND F.destination_airport = %s
     """
     cursor.execute(query, (src, des))
     res = cursor.fetchone()
-    if res and res['average_price']:
-        print(f"\nAverage ticket price from {source} to {destination}: ${res['average_price']:.2f}")
+    if res and res['avg_price']:
+        print(f"\nAverage ticket price from {src} to {des}: ${res['avg_price']:.2f}")
     else:
         print("Could not calculate average price for this route.")
-
-
 
 # Assessment 4 - Solutions:
 def show_flight_revenue_report(cursor):

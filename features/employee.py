@@ -60,7 +60,69 @@ def fire_employee(cursor):
 
 def add_new_employee(cursor):
     """Inserts a new employee into the database."""
-    print("Dummy function")
+    try:
+        print("\n--- ADD NEW EMPLOYEE ---")
+        
+        employee_id = input("Enter Employee ID (e.g., EMP019): ").upper()
+        first_name = input("Enter First Name: ")
+        last_name = input("Enter Last Name: ")
+        email = input("Enter Email: ")
+        phone = input("Enter Phone: ")
+        date_of_birth = input("Enter Date of Birth (YYYY-MM-DD): ")
+        hire_date = input("Enter Hire Date (YYYY-MM-DD): ")
+        
+        # Choose employment type
+        print("\nEmployment Type:")
+        print("1. Airport Employee")
+        print("2. Airline Employee")
+        emp_type = input("Select (1-2): ")
+        
+        airport_code = None
+        airline_id = None
+        
+        if emp_type == '1':
+            cursor.execute("SELECT airport_code, name, city FROM AIRPORT")
+            airports = cursor.fetchall()
+            print("\nAvailable Airports:")
+            for ap in airports:
+                print(f"  {ap['airport_code']}: {ap['name']}, {ap['city']}")
+            airport_code = input("Enter Airport Code: ").upper()
+        else:
+            cursor.execute("SELECT airline_id, name FROM AIRLINE WHERE status = 'Active'")
+            airlines = cursor.fetchall()
+            print("\nAvailable Airlines:")
+            for al in airlines:
+                print(f"  {al['airline_id']}: {al['name']}")
+            airline_id = input("Enter Airline ID: ").upper()
+        
+        department = input("Enter Department: ")
+        position = input("Enter Position: ")
+        salary = float(input("Enter Salary: "))
+        
+        supervisor_id = input("Enter Supervisor ID (optional): ").upper()
+        if not supervisor_id:
+            supervisor_id = None
+        
+        query = """
+            INSERT INTO EMPLOYEE (
+                employee_id, airport_code, airline_id, first_name, last_name,
+                email, phone, date_of_birth, hire_date, department, position,
+                salary, status, supervisor_id
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Active', %s)
+        """
+        
+        cursor.execute(query, (
+            employee_id, airport_code, airline_id, first_name, last_name,
+            email, phone, date_of_birth, hire_date, department, position,
+            salary, supervisor_id
+        ))
+        cursor.connection.commit()
+        print(f"\n✓ Employee {employee_id} added successfully!")
+        
+    except Exception as e:
+        cursor.connection.rollback()
+        print(f"Error adding employee: {e}")
+
 
 def update_salaries_by_position(cursor):
     """Updates the salary for all employees with a specific position."""
