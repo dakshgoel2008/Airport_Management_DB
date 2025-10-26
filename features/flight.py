@@ -187,6 +187,81 @@ def update_flight_status(cursor):
 
 
 
+def search_flight_by_id(cursor):
+    """Search for flight details by its flight id"""
+    flight_number = input("Enter Flight Numbers: ").upper()
+    flight_date = input("Enter Flight Date (YYYY-MM-DD) [optional, press Enter to skip]: ")
+
+    if flight_date:
+        query = """
+            select 
+                F.*,
+                AL.name AS airline_name,
+                AL.iata_code,
+                AC.registration AS aircraft_registration,
+                AT.model AS aircraft_model,
+                SRC.name AS source_airport_name,
+                SRC.city AS source_city,
+                DEST.name AS dest_airport_name,
+                DEST.city AS dest_city
+            from flight F
+            join airline AL on F.airline_id = AL.airline_id
+            left join aircraft AC on F.aircraft_id = AC.aircraft_id
+            left join aircraft_type AT on AC.aircraft_type_id = AT.aircraft_type_id
+            join airport SRC on F.source_airport = SRC.airport_code
+            join airport DEST on F.destination_airport = DEST.airport_code
+            where F.flight_number = %s and F.flight_date = %s
+        """
+        cursor.execute(query, (flight_number, flight_date))
+    else:
+        query = """
+            select 
+                F.*,
+                AL.name AS airline_name,
+                AL.iata_code,
+                AC.registration AS aircraft_registration,
+                AT.model AS aircraft_model,
+                SRC.name AS source_airport_name,
+                SRC.city AS source_city,
+                DEST.name AS dest_airport_name,
+                DEST.city AS dest_city  
+            from flight F
+            join airline AL on F.airline_id = AL.airline_id
+            left join aircraft AC on F.aircraft_id = AC.aircraft_id
+            left join aircraft_type AT on AC.aircraft_type_id = AT.aircraft_type_id
+            join airport SRC on F.source_airport = SRC.airport_code
+            join airport DEST on F.destination_airport = DEST.airport_code
+            where F.flight_number = %s
+            order by F.flight_date desc
+            limit 10
+        """
+        cursor.execute(query, (flight_number,))
+        
+    res = cursor.fetchall()
+
+    if res:
+        print("\n" + "="*150)
+        print("FLIGHT SEARCH RESULTS")
+        print("="*150)
+        for flight in res:
+            print(f"\nFlight: {flight['iata_code']}{flight['flight_number']} - {flight['airline_name']}")
+            print(f"Date: {flight['flight_date']}")
+            print(f"Route: {flight['source_airport_name']} ({flight['source_airport']}, {flight['source_city']})")
+            print(f"    → {flight['dest_airport_name']} ({flight['destination_airport']}, {flight['dest_city']})")
+            print(f"Departure: {flight['scheduled_departure']} | Arrival: {flight['scheduled_arrival']}")
+            if flight['aircraft_registration']:
+                print(f"Aircraft: {flight['aircraft_model']} ({flight['aircraft_registration']})")
+            print(f"Status: {flight['status']}", end="")
+            if flight['delay_minutes'] > 0:
+                print(f" - DELAYED by {flight['delay_minutes']} minutes")
+            else:
+                print()
+            if flight['gate_id']:
+                print(f"Gate: {flight['gate_id']} | Terminal: {flight['terminal']}")
+            print("-" * 150)
+        print("="*150)
+    else:
+        print("No flights found with the given criteria.")
 
 # Assessment - 4 solution:
 def update_flight_status(cursor):

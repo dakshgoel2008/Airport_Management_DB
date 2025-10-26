@@ -31,40 +31,54 @@ def view_passenger_list(cursor):
 
 
 def search_passenger_by_name(cursor):
-    """Search for passengers by name"""
-    search_name = input("Enter passenger's first or last name: ")
+    """Search for passengers by first or last name"""
+    print("\n TIP: You can even search using any partial name! [for example mes -> James, Messi, etc.]\n")
+    search_term = input("Enter passenger's first or last name: ").strip()
     
-    try:
-        query = """
-            SELECT passenger_id, first_name, last_name, email, phone, 
-                   nationality, passport_number, frequent_flyer_number
-            FROM PASSENGER
-            WHERE first_name LIKE %s OR last_name LIKE %s
-            ORDER BY last_name, first_name
-        """
-        search_pattern = f"%{search_name}%"
-        cursor.execute(query, (search_pattern, search_pattern))
-        results = cursor.fetchall()
-        
-        if results:
-            print("\n" + "#"*100)
-            print(f"SEARCH RESULTS FOR '{search_name}'")
-            print("#"*100)
-            for row in results:
-                print(f"ID: {row['passenger_id']}")
-                print(f"Name: {row['first_name']} {row['last_name']}")
-                print(f"Email: {row['email'] or 'N/A'}")
-                print(f"Phone: {row['phone'] or 'N/A'}")
-                print(f"Nationality: {row['nationality']}")
-                print(f"Passport: {row['passport_number']}")
-                if row['frequent_flyer_number']:
-                    print(f"Frequent Flyer: {row['frequent_flyer_number']}")
-                print("-" * 50)
-            print("#"*100)
-        else:
-            print(f"No passengers found matching '{search_name}'")
-    except Exception as e:
-        print(f"Error searching passenger: {e}")
+    if not search_term:
+        print("Search term cannot be empty.")
+        return
+    
+    query = """
+        SELECT 
+            P.passenger_id,
+            P.first_name,
+            P.last_name,
+            P.email,
+            P.phone,
+            P.nationality,
+            P.passport_number,
+            P.frequent_flyer_number,
+            P.date_of_birth,
+            COUNT(DISTINCT T.ticket_id) AS total_bookings,
+            COUNT(DISTINCT CASE WHEN T.ticket_status = 'Active' THEN T.ticket_id END) AS active_bookings
+        FROM PASSENGER P
+        LEFT JOIN TICKET T ON P.passenger_id = T.passenger_id
+        WHERE P.first_name LIKE %s OR P.last_name LIKE %s
+        GROUP BY P.passenger_id
+        ORDER BY P.last_name, P.first_name
+    """
+    
+    search_pattern = f"%{search_term}%"
+    cursor.execute(query, (search_pattern, search_pattern))
+    results = cursor.fetchall()
+    
+    if results:
+        print("\n" + "="*120)
+        print(f"PASSENGER SEARCH RESULTS FOR: '{search_term}'")
+        print("="*120)
+        for idx, row in enumerate(results, 1):
+            print(f"\n{idx}. {row['first_name']} {row['last_name']} ({row['passenger_id']})")
+            print(f"   Email: {row['email'] or 'N/A'} | Phone: {row['phone'] or 'N/A'}")
+            print(f"   Nationality: {row['nationality']} | DOB: {row['date_of_birth']}")
+            print(f"   Passport: {row['passport_number']}")
+            if row['frequent_flyer_number']:
+                print(f"   Frequent Flyer: {row['frequent_flyer_number']}")
+            print(f"   Total Bookings: {row['total_bookings']} | Active Bookings: {row['active_bookings']}")
+            print("-" * 120)
+        print("="*120)
+    else:
+        print(f"No passengers found matching '{search_term}'.")
 
 
 def add_new_passenger(cursor):
@@ -109,4 +123,3 @@ def add_new_passenger(cursor):
     except Exception as e:
         cursor.connection.rollback()
         print(f"Error adding passenger: {e}")
-

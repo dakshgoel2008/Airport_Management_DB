@@ -17,6 +17,7 @@ def view_menu():
     print("1. View all Upcoming Flights")
     print("2. View Passenger Details of a Flight")
     print("3. View Crew Members of a Flight")
+    print("4. View Booking details")
     print("100. Back to Main Menu")
     return input("Enter your choice: ").strip()
 

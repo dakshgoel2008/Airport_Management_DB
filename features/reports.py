@@ -56,6 +56,8 @@ def avg_ticket_price_on_route(cursor):
     else:
         print("Could not calculate average price for this route.")
 
+
+
 # Assessment 4 - Solutions:
 def show_flight_revenue_report(cursor):
     """Calls the stored procedure to generate a flight revenue report"""

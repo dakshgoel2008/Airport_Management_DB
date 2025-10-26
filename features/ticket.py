@@ -112,3 +112,81 @@ def add_new_ticket(cursor):
     except Exception as e:
         cursor.connection.rollback()
         print(f"Error creating ticket: {e}")
+
+def view_booking_details(cursor):
+    """View complete booking details"""
+    booking_id = input("Enter Booking ID: ").upper()
+    
+    query = """ 
+        SELECT 
+            B.*,
+            P.first_name,
+            P.last_name,
+            P.email AS passenger_email,
+            P.phone AS passenger_phone,
+            TA.name AS travel_agent_name
+        FROM BOOKING B
+        JOIN PASSENGER P ON B.passenger_id = P.passenger_id
+        LEFT JOIN TRAVEL_AGENT TA ON B.travel_agent_id = TA.travel_agent_id
+        WHERE B.booking_id = %s
+    """
+    cursor.execute(query, (booking_id,))
+    booking = cursor.fetchone()
+
+    if not booking:
+        print("No booking found with the given ID.")
+        return
+    
+    ticket_query = """
+        SELECT 
+            T.*,
+            F.source_airport,
+            F.destination_airport,
+            F.scheduled_departure,
+            F.scheduled_arrival,
+            AL.name AS airline_name
+        FROM TICKET T
+        JOIN FLIGHT F ON T.flight_number = F.flight_number AND T.flight_date = F.flight_date
+        JOIN AIRLINE AL ON F.airline_id = AL.airline_id
+        WHERE T.booking_id = %s
+        ORDER BY F.scheduled_departure
+    """
+
+    cursor.execute(ticket_query, (booking_id,))
+    tickets = cursor.fetchall()
+
+    print("\n" + "="*120)
+    print("BOOKING DETAILS")
+    print("="*120)
+    print(f"Booking ID: {booking['booking_id']}")
+    print(f"Booking Reference: {booking['booking_reference']}")
+    print(f"Booking Date: {booking['booking_date']}")
+    print(f"Booking Status: {booking['booking_status']}")
+    print(f"Payment Status: {booking['payment_status']}")
+    print(f"\nPassenger: {booking['first_name']} {booking['last_name']}")
+    print(f"Contact: {booking['passenger_email'] or 'N/A'} | {booking['passenger_phone'] or 'N/A'}")
+    if booking['travel_agent_name']:
+        print(f"Booked via: {booking['travel_agent_name']}")
+    print(f"\nTotal Amount: ${booking['total_amount']:,.2f} ({booking['currency']})")
+    
+    print("\n" + "-"*120)
+    print("TICKETS IN THIS BOOKING:")
+    print("-"*120)
+    
+    if tickets:
+        for idx, ticket in enumerate(tickets, 1):
+            print(f"\n{idx}. Ticket ID: {ticket['ticket_id']}")
+            print(f"   Flight: {ticket['flight_number']} on {ticket['flight_date']}")
+            print(f"   Airline: {ticket['airline_name']}")
+            print(f"   Route: {ticket['source_airport']} → {ticket['destination_airport']}")
+            print(f"   Departure: {ticket['scheduled_departure']} | Arrival: {ticket['scheduled_arrival']}")
+            print(f"   Class: {ticket['class']} | Seat: {ticket['seat_number'] or 'Not Assigned'}")
+            print(f"   Fare: ${ticket['fare_amount']:,.2f}")
+            print(f"   Status: {ticket['ticket_status']} | Check-in: {ticket['check_in_status']}")
+            if ticket['special_requests']:
+                print(f"   Special Requests: {ticket['special_requests']}")
+    else:
+        print("No tickets found for this booking.")
+    
+    print("="*120)
+

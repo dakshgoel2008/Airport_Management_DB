@@ -64,6 +64,8 @@ def view_dispatch(choice, cursor) -> None:
         view_passenger_list(cursor)
     elif choice == "3":
         view_flight_crew(cursor)
+    elif choice == "4":
+        view_booking_details(cursor)
     else:
         print("Invalid option in View menu.")
 
@@ -97,9 +99,9 @@ def delete_dispatch(choice, cursor) -> None:
 
 def search_dispatch(choice, cursor) -> None:
     if choice == "1":
-        print("Function to search flight by ID not implemented yet.")
+        search_flight_by_id(cursor)
     elif choice == "2":
-        print("Function to search passenger by name not implemented yet.")
+        search_passenger_by_name(cursor)
     elif choice == "3":
         search_employee(cursor) 
     elif choice == "4":
