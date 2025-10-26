@@ -158,6 +158,7 @@ INSERT INTO `BOOKING` (`booking_id`, `passenger_id`, `booking_date`, `total_amou
 
 -- FLIGHT 
 INSERT INTO `FLIGHT` (`flight_number`, `airline_id`, `aircraft_id`, `source_airport`, `destination_airport`, `scheduled_departure`, `scheduled_arrival`, `actual_departure`, `actual_arrival`, `status`, `gate_id`, `terminal`, `delay_minutes`, `flight_date`) VALUES
+('BA400', 'BA001', 'BA001-002', 'LHR', 'JFK', '2025-10-27 20:15:00', '2025-10-27 23:45:00', NULL, NULL, 'Scheduled', 'M5', '3', 0, '2025-10-27'),
 ('AA100', 'AA001', 'AA001-001', 'JFK', 'LAX', '2024-12-20 08:00:00', '2024-12-20 11:30:00', '2024-12-20 08:15:00', '2024-12-20 11:45:00', 'Arrived', 'A12', '4', 15, '2024-12-20'),
 ('AA101', 'AA001', 'AA001-002', 'LAX', 'JFK', '2024-12-20 14:00:00', '2024-12-20 22:30:00', '2024-12-20 14:00:00', '2024-12-20 22:25:00', 'Arrived', 'B8', '6', 0, '2024-12-20'),
 ('DL200', 'DL001', 'DL001-001', 'ATL', 'LHR', '2024-12-21 18:45:00', '2024-12-22 07:15:00', NULL, NULL, 'Scheduled', 'C15', '1', 0, '2024-12-21'),
