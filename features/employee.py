@@ -1,3 +1,4 @@
+from decimal import Decimal
 def view_flight_crew(cursor):
     """Display crew members for a specific flight"""
     print("\n" + "="*80)
@@ -420,7 +421,7 @@ def update_salaries_by_position(cursor):
         # Get new salary
         while True:
             try:
-                new_salary = float(input("New Salary: $").strip().replace(',', ''))
+                new_salary = Decimal(input("New Salary: $").strip().replace(',', ''))
                 if new_salary < 0:
                     print("Salary must be positive.")
                     continue
